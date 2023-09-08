@@ -1,28 +1,27 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Build and Deploy') {
+     parameters {
+        string(name: 'DOCKERHUB_CREDENTIALS', defaultValue: '', description: 'Docker Hub credentials ID')
+    }
+
+
+    
+        stage('Build and Publish') {
             steps {
-                script {
-                    // Define a Docker image name (customize as needed)
-                    def dockerImageName = 'your-react-app:latest'
-
-                    // Build the Docker image
-                    sh "docker build -t $dockerImageName ."
-
-                    // Run the Docker container
-                    sh "docker run -d -p 3000:3000 $dockerImageName"
-                }
+     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "docker build -t ${DOCKER_USERNAME}/nodeapp:latest ."
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                        sh "docker push ${DOCKER_USERNAME}/nodeapp:latest"           
             }
         }
     }
 
-    post {
-        always {
-            // Clean up Docker containers and images (optional)
-            sh 'docker stop $(docker ps -q)'
-            sh 'docker rmi $(docker images -q)'
+        stage('Run Container') {
+            steps {
+                // Run the Docker container
+                script {
+                    docker.image('khareutkarsh/nodeapp:latest').run('-p 8080:80')
+                }
+            }
         }
-    }
-}
