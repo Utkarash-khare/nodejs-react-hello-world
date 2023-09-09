@@ -37,7 +37,7 @@ pipeline {
                 script {
                      withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     // Run the Docker container
-                    def customContainer = docker.image('khareutkarsh/nodeapp:jenkins').run('-d -p 8080:80')
+                    def customContainer = docker.image("${DOCKER_USERNAME}/nodeapp:jenkins").run("-d", "-p", "8080:80")
                      }
                 }
             }
