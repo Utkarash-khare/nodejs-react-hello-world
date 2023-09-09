@@ -16,27 +16,29 @@ pipeline {
 
         
 
-        stage('Push Docker Image') {
+        stage('Build & Push') {
             steps {
                 script {
  
                     // Log in to Docker registry
                     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                        // Build the Docker image
-                    sh "docker build -t ${DOCKER_USERNAME}/nodeapp:jenkikns ." 
+                    sh "docker build -t ${DOCKER_USERNAME}/nodeapp:jenkins ." 
                     sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                     // Push the Docker image to your registry (e.g., Docker Hub)
-                    sh "docker push ${DOCKER_USERNAME}/nodeapp:jenkikns"
+                    sh "docker push ${DOCKER_USERNAME}/nodeapp:jenkins"
                     }
                 }
             }
         }
 
-        stage('Run Container') {
+        stage('Run Docker Container') {
             steps {
-                // Run the Docker container
                 script {
-                    docker.image('khareutkarsh/nodeapp:jenkikns').run('-p 8080:80')
+                     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    // Run the Docker container
+                    def customContainer = docker.image('${DOCKER_USERNAME}/nodeapp:jenkins').run('-d -p 8080:80')
+                     }
                 }
             }
         }
