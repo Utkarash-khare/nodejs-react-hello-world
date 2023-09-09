@@ -19,17 +19,15 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-
-                    / Build the Docker image
-                    sh "docker build -t ${DOCKER_USERNAME}/nodeapp:jenkikns ."
-                    
+ 
                     // Log in to Docker registry
                     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    }
-
+                       // Build the Docker image
+                    sh "docker build -t ${DOCKER_USERNAME}/nodeapp:jenkikns ." 
+                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                     // Push the Docker image to your registry (e.g., Docker Hub)
                     sh "docker push ${DOCKER_USERNAME}/nodeapp:jenkikns"
+                    }
                 }
             }
         }
